@@ -1,0 +1,29 @@
+body {
+	background-color: #F9F9F9;
+	overflow-y: scroll;
+}
+.container {
+	width: 640px;
+}
+.alert {
+	padding-right: 14px;
+}
+.page-header > span {
+	float: right;
+	visibility: hidden;
+}
+.alert a:hover {
+	text-decoration: none;
+}
+#events-wrap {
+	overflow: hidden;
+	height: 100px;
+}
+#events {
+	position: relative;
+}
+#events .alert img {
+	width: 30px;
+	height: 30px;
+	border-radius: 5px;
+}

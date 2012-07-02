@@ -1,0 +1,12 @@
+{application, github_events,
+ [
+  {description, "GitHub Events"},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { github_events_app, []}},
+  {env, []}
+ ]}.
