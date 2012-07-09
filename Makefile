@@ -1,4 +1,8 @@
-rebar = escript rebar
+ifeq ( $(findstring, Windows, $(OS)), )
+	rebar = escript rebar
+else
+	rebar = escript.exe rebar
+endif
 app = github_events
 port = 5000
 
