@@ -5,7 +5,6 @@ function connect() {
 	var bulletUrl = "ws://" + document.location.host + "/events";
 	var bullet = $.bullet(bulletUrl);
 	bullet.onopen = function() {
-		console.log("open");
 		connected = true;
 		addEvent({
 			content: "Connected!"
@@ -15,18 +14,19 @@ function connect() {
 	};
 	bullet.onclose = function() {
 		console.log("close");
-		// if (connected) {
-		// 	connected = false;
-		// 	addEvent({
-		// 		content: "closed."
-		// 		, type: "Log"
-		// 		, 'class': 'alert-error'
-		// 	});
-		// }
-		// setTimeout(connect, 5000);
 	};
 	bullet.onerror = function() {
 		console.log("onerror");
+	};
+	bullet.ondisconnect = function() {
+		if (connected) {
+			connected = false;
+			addEvent({
+				content: "Disconnected."
+				, type: "Log"
+				, 'class': 'alert-error'
+			});
+		}
 	};
 	bullet.onmessage = function(event) {
 		// console.log(event.data);
