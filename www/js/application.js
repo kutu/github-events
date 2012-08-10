@@ -1,3 +1,6 @@
+// turn off websocket for heroku
+window.WebSocket = undefined;
+
 // connect to server
 var connected = false;
 var lastId = 0, lastRateLimit = 0;
