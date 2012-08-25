@@ -1,4 +1,4 @@
-// turn off websocket for heroku
+// turn off websocket for webkit
 window.WebSocket = undefined;
 
 // connect to server
@@ -32,7 +32,6 @@ function connect() {
 		}
 	};
 	bullet.onmessage = function(event) {
-		// console.log(event.data);
 		var events = JSON.parse(event.data);
 		$.each(events, function(index, event) {
 			addEvent(event);
@@ -41,9 +40,6 @@ function connect() {
 		});
 		this.setURL(bulletUrl + "?last_id=" + lastId + "&last_rate_limit=" + lastRateLimit);
 	};
-	// bullet.onheartbeat = function() {
-	// 	bullet.send('ping');
-	// }
 }
 
 // show event
@@ -56,11 +52,19 @@ function addEvent(json) {
 				item = $(templates.logTmpl.render(json));
 				break;
 			case "RateLimit":
-				$("#rate-limit").text(json.value);
-				var rateLimit = $(".page-header > span");
+				$("#rate-limit > span").text(json.value);
+				var rateLimit = $("#rate-limit");
 				if (rateLimit.css("visibility") == "hidden") {
 					rateLimit.css({visibility: "visible", opacity: 0});
 					rateLimit.animate({opacity: 1});
+				}
+				break;
+			case "UsersOnline":
+				$("#users-online > span").text(json.value);
+				var usersOnline = $("#users-online");
+				if (usersOnline.css("visibility") == "hidden") {
+					usersOnline.css({visibility: "visible", opacity: 0});
+					usersOnline.animate({opacity: 1});
 				}
 				break;
 			case "CommitCommentEvent":
@@ -69,12 +73,6 @@ function addEvent(json) {
 				if (!tmpl) tmpl = templates.issueCommentUrlTmpl;
 			case "PullRequestReviewCommentEvent":
 				if (!tmpl) tmpl = templates.pullRequestCommentUrlTmpl;
-				var commentBody = json.payload.comment.body;
-				var maxBodyLength = 256;
-				if (commentBody.length > maxBodyLength) {
-					commentBody = commentBody.substr(0, maxBodyLength) + "...";
-				}
-				json.payload.comment.body = commentBody;
 				item = $(templates.commentTmpl.render(json, {url: tmpl}));
 				break;
 			case "FollowEvent":
@@ -103,7 +101,7 @@ function addEvent(json) {
 	events.animate({top: 0});
 
 	// fadeOut and remove 5-th event
-	events.find(".alert").eq(5).fadeOut(1000, function() {
+	events.find(".event").eq(5).fadeOut(1000, function() {
 		$(this).remove();
 		changeEventsHeight();
 	});
@@ -126,24 +124,22 @@ function changeEventsHeight() {
 var templates = {};
 
 templates.logTmpl = Hogan.compile('\
-	<div class="alert {{ class }}">{{ content }}</div>');
+	<div class="event alert {{ class }}">{{ content }}</div>');
 
 templates.commentTmpl = Hogan.compile('\
-	<div class="alert alert-success"> \
-		<p>#{{ id }} {{ type }} at {{ created_at }}</p> \
-		<p> \
-			<a href="https://github.com/{{ actor.login }}" target="_blank"> \
-				<img src="{{ actor.avatar_url }}"> \
-				<span class="label label-success">@{{ actor.login }}</span> \
-			</a> \
-			commented in \
-			<a href="https://github.com/{{ repo.name }}" target="_blank"> \
-				<span class="badge badge-success">{{ repo.name }}</span> \
-			</a> \
-		</p> \
-		<a href="{{> url }}" target="_blank"> \
-			<pre>{{ payload.comment.body }}</pre> \
-		</a> \
+	<div class="event well well-small"> \
+		<div class="alert alert-success"> \
+			<p><a href="{{> url }}" target="_blank">#{{ id }}</a> {{ type }} at {{ created_at }}</p> \
+				<a href="https://github.com/{{ actor.login }}" target="_blank"> \
+					<img src="{{ actor.avatar_url }}"> \
+					<span class="label label-success">@{{ actor.login }}</span> \
+				</a> \
+				commented in \
+				<a href="https://github.com/{{ repo.name }}" target="_blank"> \
+					<span class="badge badge-success">{{ repo.name }}</span> \
+				</a> \
+		</div> \
+		{{{ payload.comment.body }}} \
 	</div>');
 
 templates.commitCommentUrlTmpl = Hogan.compile('{{ payload.comment.html_url }}');
@@ -151,7 +147,7 @@ templates.issueCommentUrlTmpl = Hogan.compile('{{ payload.issue.html_url }}#issu
 templates.pullRequestCommentUrlTmpl = Hogan.compile('{{ payload.comment._links.html.href }}');
 
 templates.followTmpl = Hogan.compile('\
-	<div class="alert"> \
+	<div class="event alert"> \
 		<p>#{{ id }} {{ type }} at {{ created_at }}</p> \
 		<a href="https://github.com/{{ actor.login }}" target="_blank"> \
 			<img src="{{ actor.avatar_url }}"> \
@@ -165,7 +161,7 @@ templates.followTmpl = Hogan.compile('\
 	</div>');
 
 templates.forkTmpl = Hogan.compile('\
-	<div class="alert alert-info"> \
+	<div class="event alert alert-info"> \
 		<p>#{{ id }} {{ type }} at {{ created_at }}</p> \
 		<a href="https://github.com/{{ actor.login }}" target="_blank"> \
 			<img src="{{ actor.avatar_url }}"> \
@@ -178,7 +174,7 @@ templates.forkTmpl = Hogan.compile('\
 	</div>');
 
 templates.watchTmpl = Hogan.compile('\
-	<div class="alert alert-info"> \
+	<div class="event alert alert-info"> \
 		<p>#{{ id }} {{ type }} at {{ created_at }}</p> \
 		<a href="https://github.com/{{ actor.login }}" target="_blank"> \
 			<img src="{{ actor.avatar_url }}"> \

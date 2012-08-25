@@ -10,8 +10,23 @@
 
 	<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="/css/application.css">
+</head>
+<body>
+	<div class="container">
+		<div class="page-header">
+			<div class="pull-right">
+				<span id="rate-limit" class="label">GitHub RateLimit Remaining: <span>5000</span></span>
+				<span id="users-online" class="label">Users online: <span>0</span></span>
+				<iframe src="http://ghbtns.com/github-btn.html?user=kutu&amp;repo=github-events&amp;type=watch&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="90px" height="20px"></iframe>
+			</div>
+			<h1><a href="/">GitHub Events</a></h1>
+		</div>
+		<div id="events-wrap">
+			<div id="events"></div>
+		</div>
+	</div>
 
-	<script src="/js/jquery-1.7.2.min.js"></script>
+	<script src="/js/jquery-1.8.0.min.js"></script>
 	<script src="/js/hogan-2.0.0.min.js"></script>
 	<script src="/js/bullet.js"></script>
 	<script src="/js/application.js"></script>
@@ -27,16 +42,5 @@
 		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 	})();
 	</script>
-</head>
-<body>
-	<div class="container">
-		<div class="page-header">
-			<span class="label">GitHub RateLimit Remaining: <span id="rate-limit"></span></span>
-			<h1>GitHub Events</h1>
-		</div>
-		<div id="events-wrap">
-			<div id="events"></div>
-		</div>
-	</div>
 </body>
 </html>

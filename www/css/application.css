@@ -5,12 +5,20 @@ body {
 .container {
 	width: 640px;
 }
+.page-header h1 > a, .page-header h1 > a:hover {
+	color: inherit;
+	text-decoration: none;
+}
+#rate-limit, #users-online {
+	visibility: hidden;
+	margin-bottom: 6px;
+	display: block;
+}
+#users-online {
+	float: right;
+}
 .alert {
 	padding-right: 14px;
-}
-.page-header > span {
-	float: right;
-	visibility: hidden;
 }
 .alert a:hover {
 	text-decoration: none;
@@ -26,4 +34,122 @@ body {
 	width: 30px;
 	height: 30px;
 	border-radius: 5px;
+}
+
+/* GitHub Code Highlight */
+.highlight {
+	background:#ffffff;
+}
+
+.highlight .err {
+	color:#a61717;
+	background-color:#e3d2d2;
+}
+
+.highlight .cp {
+	color:#999999;
+	font-weight:bold;
+}
+
+.highlight .cs {
+	color:#999999;
+	font-weight:bold;
+	font-style:italic;
+}
+
+.highlight .gd {
+	color:#000000;
+	background-color:#ffdddd;
+}
+
+.highlight .gd .x {
+	color:#000000;
+	background-color:#ffaaaa;
+}
+
+.highlight .gi {
+	color:#000000;
+	background-color:#ddffdd;
+}
+
+.highlight .gi .x {
+	color:#000000;
+	background-color:#aaffaa;
+}
+
+.highlight .go {
+	color:#888888;
+}
+
+.highlight .gu {
+	color:#800080;
+	font-weight:bold;
+}
+
+.highlight .nb {
+	color:#0086B3;
+}
+
+.highlight .ni {
+	color:#800080;
+}
+
+.highlight .nt {
+	color:#000080;
+}
+
+.highlight .w {
+	color:#bbbbbb;
+}
+
+.highlight .sr {
+	color:#009926;
+}
+
+.highlight .ss {
+	color:#990073;
+}
+
+.highlight .gc {
+	color:#999;
+	background-color:#EAF2F5;
+}
+
+.highlight .c,.highlight .cm,.highlight .c1 {
+	color:#999988;
+	font-style:italic;
+}
+
+.highlight .gr,.highlight .gt {
+	color:#aa0000;
+}
+
+.highlight .gh,.highlight .bp {
+	color:#999999;
+}
+
+.highlight .gp,.highlight .nn {
+	color:#555555;
+}
+
+.highlight .kt,.highlight .nc {
+	color:#445588;
+	font-weight:bold;
+}
+
+.highlight .m,.highlight .mf,.highlight .mh,.highlight .mi,.highlight .mo,.highlight .il {
+	color:#009999;
+}
+
+.highlight .s,.highlight .sb,.highlight .sc,.highlight .sd,.highlight .s2,.highlight .se,.highlight .sh,.highlight .si,.highlight .sx,.highlight .s1 {
+	color:#d14;
+}
+
+.highlight .na,.highlight .no,.highlight .nv,.highlight .vc,.highlight .vg,.highlight .vi {
+	color:#008080;
+}
+
+.highlight .ne,.highlight .nf {
+	color:#990000;
+	font-weight:bold;
 }

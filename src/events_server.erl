@@ -64,7 +64,10 @@ init([]) ->
 handle_call({get_events, LastId, LastRateLimit}, _From, State) ->
 	LastRateEvent = if
 		LastRateLimit /= State#state.rate_limit ->
-			[create_rate_limit_event(State#state.rate_limit)];
+			[
+				create_rate_limit_event(State#state.rate_limit)
+				, create_users_online_event(State#state.users_online)
+			];
 		true ->
 			[]
 	end,
@@ -117,12 +120,22 @@ handle_cast(_Msg, State) ->
 handle_info(get_events, #state{running = true} = State) ->
 	State2 = case get_events(State#state.url, State#state.last_id) of
 		{ok, {Events, LastId}, RateLimit} ->
-			EventsFiltered = lists:filter(fun filter_event/1, Events),
+			EventsFiltered = [
+				case convert_markdown(Event) of
+					{ok, Event2, NewRateLimit} ->
+						State#state{rate_limit = NewRateLimit},
+						Event2;
+					{ok, Event2} -> Event2;
+					{error, Reason} -> Event
+				end || Event <- lists:filter(fun filter_event/1, Events)],
 			EventsFilteredLen = length(EventsFiltered),
 			if
 				EventsFilteredLen > 0 ->
  					gproc:send({p, l, ws_events}, {events, lists:append(
- 							[create_rate_limit_event(RateLimit)]
+ 							[
+ 								create_rate_limit_event(RateLimit)
+ 								, create_users_online_event(State#state.users_online)
+ 							]
  							, [Event#event.json || Event <- EventsFiltered]
  						)});
  				true ->
@@ -175,6 +188,52 @@ get_events(Url, LastId) ->
 			{error, Reason}
 	end.
 
+convert_markdown(#event{type = EventType, json = Json} = Event) when
+		EventType == <<"CommitCommentEvent">>;
+		EventType == <<"IssueCommentEvent">>;
+		EventType == <<"PullRequestReviewCommentEvent">> ->
+	{struct, Payload} = proplists:get_value(<<"payload">>, Json),
+	{struct, Comment} = proplists:get_value(<<"comment">>, Payload),
+	CommentBody = proplists:get_value(<<"body">>, Comment),
+	{struct, Repo} = proplists:get_value(<<"repo">>, Json),
+	Context = proplists:get_value(<<"name">>, Repo),
+	Request = {"https://api.github.com/markdown"
+		, []
+		, "application/json"
+		, iolist_to_binary(mochijson2:encode({struct, [
+				{text, CommentBody}
+				, {mode, <<"gfm">>}
+				, {context, Context}
+			]}))
+	},
+	case httpc:request(post, Request, [], []) of
+		{ok, {{_, Status, _}, Headers, Body}} ->
+			RateLimit = list_to_integer(proplists:get_value("x-ratelimit-remaining", Headers)),
+			case Status of
+				200 ->
+					Comment2 = lists:map(fun
+						({<<"body">>, _}) ->
+							{<<"body">>, iolist_to_binary(Body)};
+						(Tuple) -> Tuple
+					end, Comment),
+					Payload2 = lists:map(fun
+						({<<"comment">>, _}) ->
+							{<<"comment">>, {struct, Comment2}};
+						(Tuple) -> Tuple
+					end, Payload),
+					Json2 = lists:map(fun
+						({<<"payload">>, _}) ->
+							{<<"payload">>, {struct, Payload2}};
+						(Tuple) -> Tuple
+					end, Json),
+					{ok, Event#event{json = Json2}, RateLimit};
+				_ -> {ok, Event, RateLimit}
+			end;
+		{error, Reason} ->
+			{error, Reason}
+	end;
+convert_markdown(Event) -> {ok, Event}.
+
 process_events(Data, LastId) ->
 	Json = mochijson2:decode(Data),
 	Events = [parse_event(X) || {struct, X} <- Json],
@@ -205,6 +264,12 @@ create_rate_limit_event(RateLimit) ->
 	[
 		{<<"type">>, <<"RateLimit">>}
 		, {<<"value">>, RateLimit}
+	].
+
+create_users_online_event(UsersOnline) ->
+	[
+		{<<"type">>, <<"UsersOnline">>}
+		, {<<"value">>, UsersOnline}
 	].
 
 to_integer(X) when is_binary(X) ->
